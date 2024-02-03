@@ -35,11 +35,27 @@ def get_single_contact(id_contact:str):
 @app.post("/api/contacts")
 def add_contact(new_contact:ContactModel):
     contacts = md.read_contacts()
-    new_contact = new_contact.dict()
+    new_contact = new_contact.model_dump()
 
     contacts.append(new_contact)
     md.write_contacts(contacts)
 
     return{
         "success": True,
-           "message": "Added new contact"}
+        "message": "Added new contact"
+    }
+
+@app.put("/api/contacts/{idcontact}")
+def update_contact(id_contact: str, new_contact:ContactModel):
+    contacts = md.read_contacts()
+
+    for index, contact in enumerate(contacts):
+        if contact["id"] == id_contact:
+            contacts[index] = new_contact.model_dump()
+
+            md.write_contacts(contacts)
+            return {
+                "success":True,
+                "message": "Updated Contact"
+            }
+    raise HTTPException(status_code=404, detail="Contact not Found")
