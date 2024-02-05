@@ -7,6 +7,7 @@ from src.router.get_contact import get_contact
 from src.router.post_contact import post_contacts
 from src.router.put_contact import put_contact
 from src.router.delete_contact import delete_contact
+from src.router.patch_contact import patch_contact
 
 class ContactModel(BaseModel):
     id: str = str(uuid())
@@ -44,3 +45,19 @@ def update_contact(id_contact: str, new_contact:ContactModel):
 @app.delete("/api/contacts/{id_contact}")
 def remove_contact(id_contact:str):
     return delete_contact(id_contact)
+
+@app.patch("/api/contacts/{id_contact}")
+def updated_by_patch(id_contact:str,field_to_update:str,  new_value:str):
+    md = ManageDb()
+    contacts = md.read_contacts()
+
+    for index, contact in enumerate(contacts):
+        if contact.get("id") == id_contact:
+            setattr(contacts[index], field_to_update, new_value)
+
+            md.write_contacts(contacts)
+            return {
+                "success":True, 
+                "message": "Updated Contact"
+            }
+    raise HTTPException(status_code=404, detail= "Contact not found")
